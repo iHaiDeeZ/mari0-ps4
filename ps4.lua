@@ -5,7 +5,7 @@
 	 - DualShock 4 controls through the SDL GameController API (love.gamepad*)
 	 - right analog stick aims the portal gun, L2 = blue portal, R2 = orange portal
 	 - menu navigation with the D-pad / left stick / Cross / Circle / Options
-	 - fixed TV resolution: the game renders into a canvas that is letterboxed onto the screen
+	 - fixed TV resolution: the game renders into a canvas that is scaled to fill the screen
 
 	Pad bindings are stored in the regular controls table as {"pad", <pad number>, <action>}
 	so they survive saveconfig/loadconfig like any other binding.
@@ -33,6 +33,10 @@ ps4.triggerpress = 0.5     -- trigger pulled past this fires a portal...
 ps4.triggerrelease = 0.3   -- ...and must come back below this before it can fire again
 ps4.menurepeatdelay = 0.4
 ps4.menurepeatrate = 0.08
+
+-- "fill": scale the game up to fill the TV (sharp pixels, slightly uneven in size).
+-- "integer": exact whole-number scale, perfectly even pixels, with black borders.
+ps4.screenmode = "fill"
 
 ps4.console = false
 
@@ -371,8 +375,9 @@ end
 -- DISPLAY --
 -------------
 
--- On console the screen resolution is fixed, so pick the biggest integer scale that fits
--- and render into a canvas that gets centered on screen (scissor rects are in canvas space that way).
+-- On console the screen resolution is fixed. The game renders at the biggest integer scale that
+-- fits into a canvas (scissor rects are in canvas space that way), which postdraw then scales to
+-- fill the screen (ps4.screenmode) and centers.
 function ps4.changescale()
 	if love.system.getOS() == "PS4" then
 		love.window.setMode(0, 0, {fullscreen=true, vsync=true})
@@ -411,6 +416,11 @@ function ps4.postdraw()
 	local blendmode, alphamode = love.graphics.getBlendMode()
 	love.graphics.setBlendMode("alpha", "premultiplied")
 	local screenw, screenh = love.graphics.getDimensions()
-	love.graphics.draw(ps4.frame, math.floor((screenw-gamewidth)/2), math.floor((screenh-gameheight)/2))
+	local s = 1
+	if ps4.screenmode == "fill" then
+		s = math.min(screenw/gamewidth, screenh/gameheight) -- keep the aspect ratio
+	end
+	local w, h = math.floor(gamewidth*s), math.floor(gameheight*s)
+	love.graphics.draw(ps4.frame, math.floor((screenw-w)/2), math.floor((screenh-h)/2), 0, w/gamewidth, h/gameheight)
 	love.graphics.setBlendMode(blendmode, alphamode)
 end

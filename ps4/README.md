@@ -5,7 +5,7 @@ Mari0 runs on PS4 homebrew on top of **LÖVE for PS4**, a separate project and r
 contains the game side:
 
 - `../ps4.lua` is the platform layer: DualShock 4 controls, right-stick aiming, L2/R2 portals,
-  menu navigation and the 1080p letterbox.
+  menu navigation, and scaling the picture to fill the TV (`ps4.screenmode`).
 - `build-pkg.sh` packs the game into `mari0.love` and builds a PS4 `.pkg` with love-ps4.
 - `icon0.png` is the home screen icon.
 
@@ -13,10 +13,10 @@ contains the game side:
 
 | Part | State |
 |---|---|
-| Controller layer | Done. Tested in desktop LÖVE with a simulated DualShock 4: aim, both portals, trigger re-arming, walking, pause. |
+| Controller layer | Done. Tested in desktop LÖVE with a simulated DualShock 4 (aim, both portals, trigger re-arming, walking, pause), then on a PS4. |
 | LÖVE runtime for PS4 | Builds and packages (love-ps4 repo) |
 | Mari0 `.pkg` | Builds (`IV0000-MARI00006_00-MARI000000000000.pkg`) |
-| Running on a real PS4 | **Not tested yet** |
+| Running on a real PS4 | **Works** (GoldHEN, with the RetroArch Piglet/shader compiler modules) |
 
 ## Controls (DualShock 4)
 
@@ -70,5 +70,5 @@ before running `build-pkg.sh` to bundle them.
 love . --ps4
 ```
 
-This runs console mode in a 1280×720 window with a DS4 on USB or Bluetooth: letterboxing, pad
+This runs console mode in a 1280×720 window with a DS4 on USB or Bluetooth: screen scaling, pad
 controls, no mouse.
