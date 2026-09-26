@@ -10,8 +10,8 @@ local function CreateShaderPass()
 	local pass = {
 		cureffect = "",
 		on = false,
-		xres = love.graphics.getWidth(),
-		yres = love.graphics.getHeight(),
+		xres = gamewidth or love.graphics.getWidth(),
+		yres = gameheight or love.graphics.getHeight(),
 	}
 
 	function pass:useCanvas()
@@ -96,6 +96,10 @@ function shaders:init(numpasses)
 	numpasses = numpasses or 2
 
 	local files = love.filesystem.getDirectoryItems("shaders")
+	if ps4 and ps4.console then
+		-- every effect would go through the PS4's runtime shader compiler at startup; not worth it yet
+		files = {}
+	end
 
 	for i,v in ipairs(files) do
 		local filename, filetype = v:match("(.+)%.(.-)$")
@@ -162,10 +166,10 @@ end
 function shaders:refresh()
 	if not self.scale or self.scale ~= scale
 	or not self.xres or not self.yres
-	or self.xres ~= love.graphics.getWidth() or self.yres ~= love.graphics.getHeight() then
+	or self.xres ~= (gamewidth or love.graphics.getWidth()) or self.yres ~= (gameheight or love.graphics.getHeight()) then
 		self.scale = scale
 
-		self.xres, self.yres = love.graphics.getWidth(), love.graphics.getHeight()
+		self.xres, self.yres = gamewidth or love.graphics.getWidth(), gameheight or love.graphics.getHeight()
 		self.po2xres, self.po2yres = FindNextPO2(self.xres), FindNextPO2(self.yres)
 
 		for i,v in ipairs(self.passes) do
@@ -213,7 +217,7 @@ function shaders:postdraw()
 		if i < #activepasses then
 			activepasses[i+1]:predraw()
 		else
-			love.graphics.setCanvas()
+			love.graphics.setCanvas(self.outputcanvas) -- nil = screen; the PS4 layer renders into its own canvas
 		end
 		v:postdraw()
 	end

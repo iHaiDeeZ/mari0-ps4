@@ -694,7 +694,9 @@ function menu_draw()
 
 					local s = ""
 
-					if controls[skinningplayer][controlstable[i]] then
+					if controls[skinningplayer][controlstable[i]] and controls[skinningplayer][controlstable[i]][1] == "pad" then
+						s = ps4.describe(controls[skinningplayer][controlstable[i]])
+					elseif controls[skinningplayer][controlstable[i]] then
 						for j = 1, #controls[skinningplayer][controlstable[i]] do
 							s = s .. controls[skinningplayer][controlstable[i]][j]
 						end
@@ -1745,7 +1747,9 @@ function menu_keypressed(key, unicode)
 		if (key == "return" or key == "enter" or key == "kpenter" or key == "space") then
 			if optionstab == 1 then
 				if optionsselection == 3 then
-					if mouseowner == skinningplayer then
+					if ps4.console then
+						-- no mouse on console
+					elseif mouseowner == skinningplayer then
 						mouseowner = 0
 					else
 						mouseowner = skinningplayer

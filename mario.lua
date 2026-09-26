@@ -1022,6 +1022,15 @@ function mario:updateangle()
 		local scale = scale
 		if shaders and shaders.scale then scale = shaders.scale end
 		self.pointingangle = math.atan2(self.x+6/16-xscroll-(love.mouse.getX()/16/scale), (self.y+6/16-.5)-(love.mouse.getY()/16/scale))
+	elseif controls[self.playernumber]["aimx"][1] == "pad" then
+		--right analog stick; when it's centered the gun keeps pointing where it was
+		local x, y = ps4.aim(controls[self.playernumber]["aimx"][2])
+		if x then
+			self.pointingangle = math.atan2(x, y)
+			if self.pointingangle == 0 then
+				self.pointingangle = 0 --see below, -0 crashes
+			end
+		end
 	elseif #controls[self.playernumber]["aimx"] > 0 then
 		local x, y
 

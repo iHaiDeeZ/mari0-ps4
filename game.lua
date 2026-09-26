@@ -2903,6 +2903,42 @@ function shootportal(plnumber, i, sourcex, sourcey, direction)
 	table.insert(portalprojectiles, portalprojectile:new(sourcex, sourcey, x, y, color, true, {plnumber, i, cox, coy, side, tendency, x, y}))
 end
 
+--portal gun button (1 = left mouse / L2, 2 = right mouse / R2) for player pl
+function playerportalbutton(pl, button)
+	local v = objects["player"][pl]
+
+	--knockback
+	if portalknockback then
+		local xadd = math.sin(v.pointingangle)*30
+		local yadd = math.cos(v.pointingangle)*30
+		v.speedx = v.speedx + xadd
+		v.speedy = v.speedy + yadd
+		v.falling = true
+		v.animationstate = "falling"
+		v:setquad()
+	end
+
+	if playertype == "portal" then
+		shootportal(pl, button, v.x+6/16, v.y+6/16, v.pointingangle)
+	elseif playertype == "minecraft" then
+		local sourcex, sourcey = v.x+6/16, v.y+6/16
+		local cox, coy, side, tend, x, y = traceline(sourcex, sourcey, v.pointingangle)
+
+		if cox then
+			local dist = math.sqrt((v.x+v.width/2 - x)^2 + (v.y+v.height/2 - y)^2)
+			if dist <= minecraftrange then
+				if button == 1 then
+					breakingblockX = cox
+					breakingblockY = coy
+					breakingblockprogress = 0
+				else
+					placeblock(cox, coy, side)
+				end
+			end
+		end
+	end
+end
+
 function game_mousepressed(x, y, button)
 	if pausemenuopen then
 		return
@@ -2915,61 +2951,8 @@ function game_mousepressed(x, y, button)
 		end
 
 		if not noupdate and objects["player"][mouseowner] and objects["player"][mouseowner].controlsenabled and objects["player"][mouseowner].vine == false then
-
-			if button == 1 or button == 2 and objects["player"][mouseowner] then
-				--knockback
-				if portalknockback then
-					local xadd = math.sin(objects["player"][mouseowner].pointingangle)*30
-					local yadd = math.cos(objects["player"][mouseowner].pointingangle)*30
-					objects["player"][mouseowner].speedx = objects["player"][mouseowner].speedx + xadd
-					objects["player"][mouseowner].speedy = objects["player"][mouseowner].speedy + yadd
-					objects["player"][mouseowner].falling = true
-					objects["player"][mouseowner].animationstate = "falling"
-					objects["player"][mouseowner]:setquad()
-				end
-			end
-
-			if button == 1 then
-				if playertype == "portal" then
-					local sourcex = objects["player"][mouseowner].x+6/16
-					local sourcey = objects["player"][mouseowner].y+6/16
-					local direction = objects["player"][mouseowner].pointingangle
-
-					shootportal(mouseowner, 1, sourcex, sourcey, direction)
-				elseif playertype == "minecraft" then
-					local v = objects["player"][mouseowner]
-					local sourcex, sourcey = v.x+6/16, v.y+6/16
-					local cox, coy, side, tend, x, y = traceline(sourcex, sourcey, v.pointingangle)
-
-					if cox then
-						local dist = math.sqrt((v.x+v.width/2 - x)^2 + (v.y+v.height/2 - y)^2)
-						if dist <= minecraftrange then
-							breakingblockX = cox
-							breakingblockY = coy
-							breakingblockprogress = 0
-						end
-					end
-				end
-
-			elseif button == 2 then
-				if playertype == "portal" then
-					local sourcex = objects["player"][mouseowner].x+6/16
-					local sourcey = objects["player"][mouseowner].y+6/16
-					local direction = objects["player"][mouseowner].pointingangle
-
-					shootportal(mouseowner, 2, sourcex, sourcey, direction)
-				elseif playertype == "minecraft" then
-					local v = objects["player"][mouseowner]
-					local sourcex, sourcey = v.x+6/16, v.y+6/16
-					local cox, coy, side, tend, x, y = traceline(sourcex, sourcey, v.pointingangle)
-
-					if cox then
-						local dist = math.sqrt((v.x+v.width/2 - x)^2 + (v.y+v.height/2 - y)^2)
-						if dist <= minecraftrange then
-							placeblock(cox, coy, side)
-						end
-					end
-				end
+			if button == 1 or button == 2 then
+				playerportalbutton(mouseowner, button)
 			end
 		end
 	end
@@ -3878,7 +3861,9 @@ end
 function checkkey(s)
 	local joysticks = love.joystick.getJoysticks()
 
-	if s[1] == "joy" then
+	if s[1] == "pad" then
+		return ps4.padheld(s[2], s[3])
+	elseif s[1] == "joy" then
 		if joysticks[s[2]] == nil then
 			return false
 		elseif s[3] == "hat" then

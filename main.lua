@@ -5,8 +5,12 @@
 ]]
 
 function love.load()
+	require "ps4"
+	ps4.load()
+
 	love.filesystem.setIdentity("mari0")
-	if not love.filesystem.getSaveDirectory():match("LOVE") then
+	-- keeps old desktop saves working; on PS4 saves are simply /data/love/mari0
+	if love.system.getOS() ~= "PS4" and not love.filesystem.getSaveDirectory():match("LOVE") then
 		love.filesystem.setIdentity("LOVE/mari0")
 	end
 
@@ -26,6 +30,9 @@ function love.load()
 
 	table.remove(shaderlist, rem)
 	table.insert(shaderlist, 1, "none")
+	if ps4.console then
+		shaderlist = {"none"} -- post-processing effects are skipped on console, see shaders:init
+	end
 	currentshaderi1 = 1
 	currentshaderi2 = 1
 
@@ -35,6 +42,7 @@ function love.load()
 		players = 1
 		defaultconfig()
 	end
+	ps4.applyconsoleconfig()
 
 	saveconfig()
 	width = 25
@@ -83,6 +91,7 @@ function love.load()
 
 	math.randomseed(os.time());math.random();math.random()
 
+	ps4.predraw()
 	love.graphics.clear()
 	love.graphics.setColor(0.4, 0.4, 0.4)
 	loadingtexts = {"reticulating splines..", "loading..", "booting glados..", "growing potatoes..", "voting against acta..", "rendering important stuff..",
@@ -90,6 +99,7 @@ function love.load()
 					"tanaka, thai kick..", "loading game genie.."}
 	loadingtext = loadingtexts[math.random(#loadingtexts)]
 	properprint(loadingtext, 25*8*scale-string.len(loadingtext)*4*scale, 108*scale)
+	ps4.postdraw()
 	love.graphics.present()
 	--require ALL the files!
 	require "shaders"
@@ -766,6 +776,7 @@ function love.update(dt)
 	if music then
 		music:update()
 	end
+	ps4.update(dt)
 	dt = math.min(0.01666667, dt)
 
 	--speed
@@ -824,6 +835,7 @@ function love.update(dt)
 end
 
 function love.draw()
+	ps4.predraw()
 	shaders:predraw()
 
 	if gamestate == "menu" or gamestate == "mappackmenu" or gamestate == "onlinemenu" or gamestate == "options" then
@@ -837,6 +849,7 @@ function love.draw()
 	end
 
 	shaders:postdraw()
+	ps4.postdraw()
 
 	love.graphics.setColor(1, 1,1)
 end
@@ -1100,19 +1113,7 @@ function defaultconfig()
 	controls[i]["use"] = {"e"}
 
 	for i = 2, 4 do
-		controls[i] = {}
-		controls[i]["right"] = {"joy", i-1, "hat", 1, "r"}
-		controls[i]["left"] = {"joy", i-1, "hat", 1, "l"}
-		controls[i]["down"] = {"joy", i-1, "hat", 1, "d"}
-		controls[i]["up"] = {"joy", i-1, "hat", 1, "u"}
-		controls[i]["run"] = {"joy", i-1, "but", 3}
-		controls[i]["jump"] = {"joy", i-1, "but", 1}
-		controls[i]["aimx"] = {"joy", i-1, "axe", 5, "neg"}
-		controls[i]["aimy"] = {"joy", i-1, "axe", 4, "neg"}
-		controls[i]["portal1"] = {"joy", i-1, "but", 5}
-		controls[i]["portal2"] = {"joy", i-1, "but", 6}
-		controls[i]["reload"] = {"joy", i-1, "but", 4}
-		controls[i]["use"] = {"joy", i-1, "but", 2}
+		ps4.setpadcontrols(i, i-1) -- DualShock-style layout, see ps4.lua
 	end
 	-------------------
 	-- PORTAL COLORS --
@@ -1232,6 +1233,14 @@ end
 
 function changescale(s, fullscreen)
 	scale = s
+
+	if ps4.console then
+		ps4.changescale()
+		if shaders then
+			shaders:refresh()
+		end
+		return
+	end
 
 	if fullscreen then
 		fullscreen = true
@@ -1389,6 +1398,12 @@ function love.joystickaxis(joystick, axis, value)
 		local stickmoved = false
 		local shouldermoved = false
 
+		--controllers plugged in after startup
+		axisDeadZones[joystick] = axisDeadZones[joystick] or {}
+		if not axisDeadZones[joystick][axis] then
+			axisDeadZones[joystick][axis] = {stick=true, shoulder=true}
+		end
+
 		--If this axis is a stick, get whether it just moved out of its deadzone
 		if math.abs(value) > joystickaimdeadzone and axisDeadZones[joystick][axis]["stick"] then
 			stickmoved = true
@@ -1427,9 +1442,17 @@ function love.joystickhat(joystick, hat, direction)
 		end
 	end
 end
--- love.gamepadpressed = love.joystickpressed
--- love.gamepadreleased = love.joystickreleased
--- love.gamepadaxis = love.joystickaxis
+function love.gamepadpressed(joystick, button)
+	ps4.gamepadpressed(joystick, button)
+end
+
+function love.gamepadreleased(joystick, button)
+	ps4.gamepadreleased(joystick, button)
+end
+
+function love.gamepadaxis(joystick, axis, value)
+	ps4.gamepadaxis(joystick, axis, value)
+end
 
 function round(num, idp) --Not by me
 	local mult = 10^(idp or 0)
