@@ -337,6 +337,15 @@ function menu_draw()
 			love.graphics.translate(-tx, -ty)
 		end
 
+		--port credit, outlined so it reads on top of the ground
+		local credit, creditx, credity = "ps4 port by shiroklein", 55, 208
+		love.graphics.setColor(0, 0, 0)
+		for _, o in ipairs({{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 1}}) do
+			properprint(credit, (creditx+o[1])*scale, (credity+o[2])*scale)
+		end
+		love.graphics.setColor(1, 1, 1)
+		properprint(credit, creditx*scale, credity*scale)
+
 		if players > 1 then
 			love.graphics.draw(playerselectimg, 82*scale, 138*scale, 0, scale, scale)
 		end

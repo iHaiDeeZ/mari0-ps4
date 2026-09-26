@@ -44,7 +44,8 @@ if [ ! -f "$LOVE_PS4_BUILD/love/eboot.bin" ]; then
 fi
 
 LOVE_PS4_GAME="$LOVEFILE" \
-LOVE_PS4_TITLE="Mari0" \
+LOVE_PS4_TITLE="Mari0 (By ShiroKlein)" \
+LOVE_PS4_CONTENT_LABEL="MARI0" \
 LOVE_PS4_TITLE_ID="MARI00006" \
 LOVE_PS4_VERSION="01.06" \
 LOVE_PS4_ICON="$HERE/icon0.png" \

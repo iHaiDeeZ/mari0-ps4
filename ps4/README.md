@@ -1,5 +1,7 @@
 # Mari0 on PS4
 
+PS4 port by **ShiroKlein**. Mari0 itself is by Maurice Guégan / Stabyourself.net.
+
 Mari0 runs on PS4 homebrew on top of **LÖVE for PS4**, a separate project and repository
 (`love-ps4`) that ports the LÖVE 11.4 engine using the OpenOrbis toolchain. This repo only
 contains the game side:
