@@ -20,6 +20,10 @@ Ported to PS4 by **ShiroKlein**. It runs natively on
 ## Installing
 
 1. On the console, create the folder `/data/love/modules/` and copy both `.sprx` files into it.
+   **Use GoldHEN's FTP server** for this: files copied some other ways can end up unreadable for
+   games. Check that the sizes match exactly:
+   - `libScePigletv2VSH.sprx`: 744,208 bytes
+   - `libSceShaccVSH.sprx`: 10,394,272 bytes
 2. Download the `.pkg` from the [Releases](https://github.com/iHaiDeeZ/mari0-ps4/releases) page.
 3. Install it with GoldHEN's Package Installer.
 4. Start **Mari0 (By ShiroKlein)** from the home screen.
@@ -52,8 +56,12 @@ Up to 4 players can play together, each with their own controller.
 ## Saves and problems
 
 - Saves and settings are stored in `/data/love/mari0/`.
-- If the game goes straight back to the home screen, check that both `.sprx` files are in
-  `/data/love/modules/` with exactly those names.
+- If the game goes straight back to the home screen or shows an empty screen, check that both
+  `.sprx` files are in `/data/love/modules/` with exactly those names.
+- If `/data/love/log.txt` shows `load_prx failed due to 0x0000000d` and "No available video device",
+  the console found the files but refused to load them. Delete both and copy them again with
+  GoldHEN's FTP server, and check their sizes (see [Installing](#installing)). Files from another
+  source than RetroArch for PS4 may not load at all.
 - For anything else, look at `/data/love/log.txt`, and include it when reporting a problem.
 
 ## For developers
